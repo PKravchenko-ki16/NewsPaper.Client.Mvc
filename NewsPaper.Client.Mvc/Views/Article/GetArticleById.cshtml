@@ -1,0 +1,19 @@
+﻿@using Calabonga.OperationResults
+@using NewsPaper.Client.Mvc.ViewModels.Article;
+@model OperationResult<ArticleViewModel>
+
+<h1>GetArticleById</h1>
+
+<div class="card" style="width: 50rem; height: 60rem;">
+    <img src="@Model.Result.Picture" class="card-img-top">
+    <div class="card-body">
+        <h5 class="card-title">@Model.Result.Title</h5>
+        <p class="card-text">@Model.Result.Description</p>
+    </div>
+    <ul class="list-group list-group-flush">
+        <li class="list-group-item">Rating: @Model.Result.Rating</li>
+        <li class="list-group-item"><a asp-controller="Article" asp-action="GetArticlesByIdAuthor" asp-route-authorNikeName="@Model.Result.NikeNameAuthor">NikeNameAuthor: @Model.Result.NikeNameAuthor</a></li>
+        <li class="list-group-item">NikeNameEditor: @Model.Result.NikeNameEditor</li>
+        <li class="list-group-item">DateOfRevision: @Model.Result.DateOfRevision</li>
+    </ul>
+</div>
