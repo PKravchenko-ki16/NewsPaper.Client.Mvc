@@ -12,16 +12,11 @@ namespace NewsPaper.Client.Mvc.Controllers
             return View();
         }
 
-        public IActionResult GoodBye()
-        {
-            return View("Index");
-        }
-
         public IActionResult Logout()
         {
             var parameters = new AuthenticationProperties
             {
-                RedirectUri = "/Home/GoodBye"
+                RedirectUri = "/Home/Index"
             };
             return SignOut(
                 parameters,

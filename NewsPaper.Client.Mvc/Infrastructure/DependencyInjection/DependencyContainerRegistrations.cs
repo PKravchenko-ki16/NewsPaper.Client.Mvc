@@ -6,6 +6,7 @@ namespace NewsPaper.Client.Mvc.Infrastructure.DependencyInjection
     {
         public static void Common(IServiceCollection services)
         {
+            services.AddTransient<SetBearerTokenRequestClient>();
         }
     }
 }

@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Calabonga.OperationResults;
-using IdentityModel.Client;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NewsPaper.Client.Mvc.Infrastructure;
 using NewsPaper.Client.Mvc.ViewModels;
 using NewsPaper.Client.Mvc.ViewModels.Author;
 using NewsPaper.Client.Mvc.ViewModels.Editor;
@@ -20,10 +17,12 @@ namespace NewsPaper.Client.Mvc.Controllers
     public class AccountController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly SetBearerTokenRequestClient _retrieveToIdentityServer;
 
-        public AccountController(IHttpClientFactory httpClientFactory)
+        public AccountController(IHttpClientFactory httpClientFactory, SetBearerTokenRequestClient retrieveToIdentityServer)
         {
             _httpClientFactory = httpClientFactory;
+            _retrieveToIdentityServer = retrieveToIdentityServer;
         }
 
         public IActionResult Index()
@@ -43,7 +42,7 @@ namespace NewsPaper.Client.Mvc.Controllers
             }
             catch (Exception exception)
             {
-                await RefreshToken(model.RefreshToken);
+                await _retrieveToIdentityServer.RefreshToken(model.RefreshToken, _httpClientFactory, HttpContext);
                 model = new ClaimManager(HttpContext, User);
                 listAuthors = await RequestGetAuthorsAsync(model);
                 listAuthors.AddError(exception);
@@ -63,7 +62,7 @@ namespace NewsPaper.Client.Mvc.Controllers
             }
             catch (Exception exception)
             {
-                await RefreshToken(model.RefreshToken);
+                await _retrieveToIdentityServer.RefreshToken(model.RefreshToken, _httpClientFactory, HttpContext);
                 model = new ClaimManager(HttpContext, User);
                 listEditors = await RequestGetEditorsAsync(model);
                 listEditors.AddError(exception);
@@ -83,7 +82,7 @@ namespace NewsPaper.Client.Mvc.Controllers
             }
             catch (Exception exception)
             {
-                await RefreshToken(model.RefreshToken);
+                await _retrieveToIdentityServer.RefreshToken(model.RefreshToken, _httpClientFactory, HttpContext);
                 model = new ClaimManager(HttpContext, User);
                 listUsers = await RequestGetUsersAsync(model);
                 listUsers.AddError(exception);
@@ -93,11 +92,10 @@ namespace NewsPaper.Client.Mvc.Controllers
 
         private async Task<OperationResult<IEnumerable<AuthorViewModel>>> RequestGetAuthorsAsync(ClaimManager model)
         {
-            var clientAuthor = _httpClientFactory.CreateClient();
-            clientAuthor.SetBearerToken(model.AccessToken);
+            HttpClient client = _retrieveToIdentityServer.RetrieveToIdentityServer(_httpClientFactory, model.AccessToken);
 
             HttpResponseMessage response =
-                (await clientAuthor.GetAsync("https://localhost:5001/api/author/getauthors/")).EnsureSuccessStatusCode();
+                (await client.GetAsync("https://localhost:5001/api/author/getauthors/")).EnsureSuccessStatusCode();
 
             string responseBody = await response.Content.ReadAsStringAsync();
 
@@ -108,11 +106,10 @@ namespace NewsPaper.Client.Mvc.Controllers
 
         private async Task<OperationResult<IEnumerable<EditorViewModel>>> RequestGetEditorsAsync(ClaimManager model)
         {
-            var clientEditor = _httpClientFactory.CreateClient();
-            clientEditor.SetBearerToken(model.AccessToken);
+            HttpClient client = _retrieveToIdentityServer.RetrieveToIdentityServer(_httpClientFactory, model.AccessToken);
 
             HttpResponseMessage response =
-                (await clientEditor.GetAsync("https://localhost:5001/api/editor/geteditors/")).EnsureSuccessStatusCode();
+                (await client.GetAsync("https://localhost:5001/api/editor/geteditors/")).EnsureSuccessStatusCode();
 
             string responseBody = await response.Content.ReadAsStringAsync();
 
@@ -123,42 +120,16 @@ namespace NewsPaper.Client.Mvc.Controllers
 
         private async Task<OperationResult<IEnumerable<UserViewModel>>> RequestGetUsersAsync(ClaimManager model)
         {
-            var clientUser = _httpClientFactory.CreateClient();
-            clientUser.SetBearerToken(model.AccessToken);
+            HttpClient client = _retrieveToIdentityServer.RetrieveToIdentityServer(_httpClientFactory, model.AccessToken);
 
             HttpResponseMessage response =
-                (await clientUser.GetAsync("https://localhost:5001/api/user/getusers/")).EnsureSuccessStatusCode();
+                (await client.GetAsync("https://localhost:5001/api/user/getusers/")).EnsureSuccessStatusCode();
 
             string responseBody = await response.Content.ReadAsStringAsync();
 
             OperationResult<IEnumerable<UserViewModel>> operation = JsonConvert.DeserializeObject<OperationResult<IEnumerable<UserViewModel>>>(responseBody);
 
             return operation;
-        }
-
-        private async Task RefreshToken(string refreshToken)
-        {
-            var refreshClient = _httpClientFactory.CreateClient();
-            var resultRefreshTokenAsync = await refreshClient.RequestRefreshTokenAsync(new RefreshTokenRequest
-            {
-                Address = "https://localhost:10001/connect/token",
-                ClientId = "client_id_mvc",
-                ClientSecret = "client_secret_mvc",
-                RefreshToken = refreshToken,
-                Scope = "openid OrdersAPI offline_access"
-            });
-
-            await UpdateAuthContextAsync(resultRefreshTokenAsync.AccessToken, resultRefreshTokenAsync.RefreshToken);
-        }
-
-        private async Task UpdateAuthContextAsync(string accessTokenNew, string refreshTokenNew)
-        {
-            var authenticate = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-            authenticate.Properties.UpdateTokenValue("access_token", accessTokenNew);
-            authenticate.Properties.UpdateTokenValue("refresh_token", refreshTokenNew);
-
-            await HttpContext.SignInAsync(authenticate.Principal, authenticate.Properties);
         }
     }
 }
