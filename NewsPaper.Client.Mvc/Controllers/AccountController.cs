@@ -30,10 +30,17 @@ namespace NewsPaper.Client.Mvc.Controllers
             return View();
         }
 
+        public IActionResult AccessDenied(string returnUrl)
+        {
+            return View();
+        }
+
         [Authorize]
+        [Authorize(Policy = "AccessForAuthor")]
         public async Task<IActionResult> GetAuthors()
         {
             var model = new ClaimManager(HttpContext, User);
+
             OperationResult<IEnumerable<AuthorViewModel>> listAuthors;
             try
             {
@@ -51,6 +58,7 @@ namespace NewsPaper.Client.Mvc.Controllers
         }
 
         [Authorize]
+        [Authorize(Policy = "AccessForEditor")]
         public async Task<IActionResult> GetEditors()
         {
             var model = new ClaimManager(HttpContext, User);

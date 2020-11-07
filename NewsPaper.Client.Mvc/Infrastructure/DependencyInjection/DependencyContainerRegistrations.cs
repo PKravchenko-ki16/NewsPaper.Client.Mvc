@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.DependencyInjection;
+using NewsPaper.Client.Mvc.Infrastructure.Auth;
 
 namespace NewsPaper.Client.Mvc.Infrastructure.DependencyInjection
 {
@@ -7,6 +9,8 @@ namespace NewsPaper.Client.Mvc.Infrastructure.DependencyInjection
         public static void Common(IServiceCollection services)
         {
             services.AddTransient<SetBearerTokenRequestClient>();
+            services.AddSingleton<IAuthorizationHandler, AccessForAuthorRequirementHandler>();
+            services.AddSingleton<IAuthorizationHandler, AccessForEditorRequirementHandler>();
         }
     }
 }

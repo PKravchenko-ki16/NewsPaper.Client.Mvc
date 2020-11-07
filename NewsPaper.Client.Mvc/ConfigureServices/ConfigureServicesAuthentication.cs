@@ -1,9 +1,8 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using NewsPaper.Client.Mvc.Infrastructure.Auth;
 
 namespace NewsPaper.Client.Mvc.ConfigureServices
 {
@@ -32,18 +31,12 @@ namespace NewsPaper.Client.Mvc.ConfigureServices
 
                     config.Scope.Add("OrdersAPI");
                     config.Scope.Add("offline_access");
-
-                    config.GetClaimsFromUserInfoEndpoint = true;
-
-                    config.ClaimActions.MapJsonKey(ClaimTypes.DateOfBirth, ClaimTypes.DateOfBirth);
                 });
-
-            services.AddAuthorization(config =>
-            {
-                config.AddPolicy("HasDateOfBirth", builder =>
-                {
-                    builder.RequireClaim(ClaimTypes.DateOfBirth);
-                });
+            services.AddAuthorization(opts => {
+                opts.AddPolicy("AccessForAuthor",
+                    policy => policy.Requirements.Add(new AccessForAuthorRequirement()));
+                opts.AddPolicy("AccessForEditor",
+                    policy => policy.Requirements.Add(new AccessForEditorRequirement()));
             });
         }
     }
