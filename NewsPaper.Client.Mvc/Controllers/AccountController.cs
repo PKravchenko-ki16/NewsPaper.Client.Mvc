@@ -32,7 +32,7 @@ namespace NewsPaper.Client.Mvc.Controllers
 
         public IActionResult AccessDenied(string returnUrl)
         {
-            return View();
+            return View("AccessDenied");
         }
 
         [Authorize]

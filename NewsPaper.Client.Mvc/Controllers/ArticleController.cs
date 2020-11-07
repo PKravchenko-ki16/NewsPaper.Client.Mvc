@@ -28,6 +28,11 @@ namespace NewsPaper.Client.Mvc.Controllers
             return View();
         }
 
+        public IActionResult AccessDenied(string returnUrl)
+        {
+            return View("AccessDenied");
+        }
+
         [Authorize]
         public async Task<IActionResult> GetArticles()
         {
