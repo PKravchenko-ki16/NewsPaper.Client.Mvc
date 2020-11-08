@@ -2,9 +2,11 @@
 @using NewsPaper.Client.Mvc.ViewModels.Article;
 @model OperationResult<ArticleViewModel>
 
+<partial name="_menuArticles" model="@ViewBag.Role" />
+
 <h1>GetArticleById</h1>
 
-<div class="card" style="width: 50rem; height: 60rem;">
+<div class="card" style="width: 40rem; height: 60rem;">
     <img src="@Model.Result.Picture" class="card-img-top">
     <div class="card-body">
         <h5 class="card-title">@Model.Result.Title</h5>

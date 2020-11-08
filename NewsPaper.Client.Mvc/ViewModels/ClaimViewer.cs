@@ -19,6 +19,14 @@ namespace NewsPaper.Client.Mvc.ViewModels
             Token = "N/A";
         }
 
+        public ClaimViewer(string name, Claim claim)
+        {
+            if (claim == null) throw new ArgumentNullException(nameof(claim));
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Claim = claim;
+            Token = "N/A";
+        }
+
         public ClaimViewer(string name, string tokenJson, bool skipParsing = false)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
@@ -30,6 +38,8 @@ namespace NewsPaper.Client.Mvc.ViewModels
         }
 
         public List<Claim> Claims { get; }
+
+        public Claim Claim { get; }
 
         public string Name { get; }
 

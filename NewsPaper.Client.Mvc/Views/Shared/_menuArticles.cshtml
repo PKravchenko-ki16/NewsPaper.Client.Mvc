@@ -1,4 +1,6 @@
-﻿<ul class="nav justify-content-center">
+﻿@model string
+
+<ul class="nav justify-content-center">
     <li class="nav-item">
         <a class="nav-link active" asp-controller="Article" asp-action="GetArticles">Get All Articles</a>
     </li>
@@ -8,4 +10,10 @@
     <li class="nav-item">
         <a class="nav-link active" asp-controller="Article" asp-action="GetArticlesByIdAuthor">Get Articles By Author</a>
     </li>
+    @if (Model == "Author")
+    {
+        <li class="nav-item">
+            <a class="nav-link active" asp-controller="Article" asp-action="CreateArticle">Create Article</a>
+        </li>
+    }
 </ul>

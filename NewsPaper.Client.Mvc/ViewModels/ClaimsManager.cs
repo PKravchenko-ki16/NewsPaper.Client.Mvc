@@ -21,14 +21,36 @@ namespace NewsPaper.Client.Mvc.ViewModels
             var idTokenJson = context.GetTokenAsync("id_token").GetAwaiter().GetResult();
             var accessTokenJson = context.GetTokenAsync("access_token").GetAwaiter().GetResult();
             var refreshTokenJson = context.GetTokenAsync("refresh_token").GetAwaiter().GetResult();
+            var roleClaim = claims.SingleOrDefault(x => x.Type == ClaimTypes.Role);
 
             AddTokenInfo("Refresh Token", refreshTokenJson, true);
             AddTokenInfo("Identity Token", idTokenJson);
             AddTokenInfo("Access Token", accessTokenJson);
+            AddTokenInfo("Role Claim", roleClaim);
             AddTokenInfo("User Claims", claims);
         }
 
         public List<ClaimViewer> Items { get; }
+
+        public string RoleClaim
+        {
+            get
+            {
+                if (Items == null || Items.Count == 0)
+                {
+                    throw new InvalidOperationException("Not role claim found");
+                }
+
+                var roleClaims = Items.SingleOrDefault(x => x.Name == "Role Claim");
+                string roleValue = roleClaims?.Claim.Value;
+                if (roleValue == null)
+                {
+                    throw new InvalidOperationException("Not role claim found");
+                }
+
+                return roleValue;
+            }
+        }
 
         public string AccessToken
         {
@@ -76,6 +98,10 @@ namespace NewsPaper.Client.Mvc.ViewModels
         }
 
         private void AddTokenInfo(string nameToken, IEnumerable<Claim> claims)
+        {
+            Items.Add(new ClaimViewer(nameToken, claims));
+        }
+        private void AddTokenInfo(string nameToken, Claim claims)
         {
             Items.Add(new ClaimViewer(nameToken, claims));
         }

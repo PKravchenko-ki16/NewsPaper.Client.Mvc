@@ -2,6 +2,8 @@
 @using NewsPaper.Client.Mvc.ViewModels.Article;
 @model OperationResult<IEnumerable<ArticleViewModel>>
 
+<partial name="_menuArticles" model="@ViewBag.Role" />
+
 <h1>GetArticles</h1>
 
 <div class="row row-cols-1 row-cols-md-2">
@@ -22,5 +24,5 @@
                 </ul>
             </div>
         </div>
-     }
+    }
 </div>

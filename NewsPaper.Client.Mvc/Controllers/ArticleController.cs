@@ -23,9 +23,12 @@ namespace NewsPaper.Client.Mvc.Controllers
             _retrieveToIdentityServer = retrieveToIdentityServer;
         }
 
+        [Authorize]
         public IActionResult Index()
         {
-            return View();
+            var model = new ClaimManager(HttpContext, User);
+            ViewBag.Role = model.RoleClaim;
+            return View("Index");
         }
 
         public IActionResult AccessDenied(string returnUrl)
@@ -37,6 +40,7 @@ namespace NewsPaper.Client.Mvc.Controllers
         public async Task<IActionResult> GetArticles()
         {
             var model = new ClaimManager(HttpContext, User);
+            ViewBag.Role = model.RoleClaim;
             OperationResult<IEnumerable<ArticleViewModel>> listArticle;
             try
             {
@@ -57,6 +61,7 @@ namespace NewsPaper.Client.Mvc.Controllers
         public async Task<IActionResult> GetArticleById(Guid articleGuid)
         {
             var model = new ClaimManager(HttpContext, User);
+            ViewBag.Role = model.RoleClaim;
             OperationResult<ArticleViewModel> article;
             try
             {
@@ -77,6 +82,7 @@ namespace NewsPaper.Client.Mvc.Controllers
         public async Task<IActionResult> GetArticlesByIdAuthor(string authorNikeName)
         {
             var model = new ClaimManager(HttpContext, User);
+            ViewBag.Role = model.RoleClaim;
             OperationResult<IEnumerable<ArticleViewModel>> listArticle;
             try
             {
@@ -91,6 +97,15 @@ namespace NewsPaper.Client.Mvc.Controllers
                 listArticle.AddError(exception);
             }
             return View("GetArticles", listArticle);
+        }
+
+        [Authorize]
+        [Authorize(Policy = "AccessForAuthor")]
+        public IActionResult CreateArticle()
+        {
+            var model = new ClaimManager(HttpContext, User);
+            ViewBag.Role = model.RoleClaim;
+            return View("CreateArticle");
         }
 
         private async Task<OperationResult<IEnumerable<ArticleViewModel>>> RequestGetAtriclesAsync(ClaimManager model)
