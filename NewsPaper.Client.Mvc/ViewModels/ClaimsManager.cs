@@ -16,6 +16,8 @@ namespace NewsPaper.Client.Mvc.ViewModels
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             Items = new List<ClaimViewer>();
+            string nameIdentifier = user.Claims.SingleOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+            IdentityId = Guid.Parse(nameIdentifier ?? throw new InvalidOperationException());
             var claims = user.Claims.ToList();
 
             var idTokenJson = context.GetTokenAsync("id_token").GetAwaiter().GetResult();
@@ -31,6 +33,8 @@ namespace NewsPaper.Client.Mvc.ViewModels
         }
 
         public List<ClaimViewer> Items { get; }
+
+        public Guid IdentityId { get; set; }
 
         public string RoleClaim
         {
@@ -101,6 +105,7 @@ namespace NewsPaper.Client.Mvc.ViewModels
         {
             Items.Add(new ClaimViewer(nameToken, claims));
         }
+
         private void AddTokenInfo(string nameToken, Claim claims)
         {
             Items.Add(new ClaimViewer(nameToken, claims));

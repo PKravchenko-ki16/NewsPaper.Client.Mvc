@@ -1,5 +1,43 @@
 ﻿@using NewsPaper.Client.Mvc.ViewModels.Article;
+@model ArticleViewModel;
 
 <partial name="_menuArticles" model="@ViewBag.Role" />
 
-<p>Create Article</p>
+<h1>Create Article</h1>
+<hr />
+
+@using (Html.BeginForm("CreateArticle", "Article", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary()
+    <div class="form-group">
+        @Html.LabelFor(m => m.Title, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.TextBoxFor(m => m.Title, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Description, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.TextAreaFor(m => m.Description, 5, 8, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Text, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.TextAreaFor(m => m.Text, 10, 8, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Picture, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.TextBoxFor(m => m.Picture, new { @class = "form-control" })
+        </div>
+        <label class = "col-md-2 control-label">https://via.placeholder.com/400x300/cccccc/9c9c9c.png</label>
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" class="btn btn-dark" value="Create" />
+        </div>
+    </div>
+}

@@ -21,6 +21,16 @@ namespace NewsPaper.Client.Mvc.ViewModels.Article
 
         public string NikeNameEditor { get; set; }
 
+        public Guid AuthorGuid { get; set; }
+
+        public Guid EditorGuid { get; set; }
+
+        public bool IsArchive { get; set; }
+
+        public bool IsRevision { get; set; }
+
+        public DateTime DateOfWriting { get; set; }
+
         public DateTime DateOfRevision { get; set; }
     }
 }

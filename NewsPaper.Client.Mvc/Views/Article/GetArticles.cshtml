@@ -18,7 +18,7 @@
                 </div>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">Rating: @article.Rating</li>
-                    <li class="list-group-item"><a asp-controller="Article" asp-action="GetArticlesByIdAuthor" asp-route-authorNikeName="@article.NikeNameAuthor">NikeNameAuthor: @article.NikeNameAuthor</a></li>
+                    <li class="list-group-item">NikeNameAuthor: <a asp-controller="Article" asp-action="GetArticlesByIdAuthor" asp-route-authorNikeName="@article.NikeNameAuthor">@article.NikeNameAuthor</a></li>
                     <li class="list-group-item">NikeNameEditor: @article.NikeNameEditor</li>
                     <li class="list-group-item">DateOfRevision: @article.DateOfRevision</li>
                 </ul>

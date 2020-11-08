@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Calabonga.OperationResults;
 using Microsoft.AspNetCore.Authorization;
@@ -44,14 +45,14 @@ namespace NewsPaper.Client.Mvc.Controllers
             OperationResult<IEnumerable<ArticleViewModel>> listArticle;
             try
             {
-                listArticle = await RequestGetAtriclesAsync(model);
+                listArticle = await RequestGetArticlesAsync(model);
                 return View(listArticle);
             }
             catch(Exception exception)
             {
                 await _retrieveToIdentityServer.RefreshToken(model.RefreshToken, _httpClientFactory, HttpContext);
                 model = new ClaimManager(HttpContext, User);
-                listArticle = await RequestGetAtriclesAsync(model);
+                listArticle = await RequestGetArticlesAsync(model);
                 listArticle.AddError(exception);
             }
             return View(listArticle);
@@ -105,10 +106,49 @@ namespace NewsPaper.Client.Mvc.Controllers
         {
             var model = new ClaimManager(HttpContext, User);
             ViewBag.Role = model.RoleClaim;
-            return View("CreateArticle");
+            return View("CreateArticle", new ArticleViewModel());
         }
 
-        private async Task<OperationResult<IEnumerable<ArticleViewModel>>> RequestGetAtriclesAsync(ClaimManager model)
+        [Authorize]
+        [Authorize(Policy = "AccessForAuthor")]
+        [ValidateAntiForgeryToken]
+        [HttpPost]
+        public async  Task<IActionResult> CreateArticle([FromForm] ArticleViewModel article)
+        {
+            var model = new ClaimManager(HttpContext, User);
+            ViewBag.Role = model.RoleClaim;
+            article.AuthorGuid = model.IdentityId;
+            try
+            {
+                await RequestCreateArticleAsync(model, article);
+                return View("CreateArticleSuccessfully");
+            }
+            catch (Exception exception)
+            {
+                await _retrieveToIdentityServer.RefreshToken(model.RefreshToken, _httpClientFactory, HttpContext);
+                model = new ClaimManager(HttpContext, User);
+                await RequestCreateArticleAsync(model, article);
+            }
+            return View("CreateArticleSuccessfully");
+        }
+
+        private async Task RequestCreateArticleAsync(ClaimManager model, ArticleViewModel article)
+        {
+            HttpClient client = _retrieveToIdentityServer.RetrieveToIdentityServer(_httpClientFactory, model.AccessToken);
+
+            string json = JsonConvert.SerializeObject(article);
+
+            HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response =
+                (await client.PostAsync("https://localhost:5001/api/article/createarticle/", content)).EnsureSuccessStatusCode();
+
+            string responseBody = await response.Content.ReadAsStringAsync();
+
+            //OperationResult<ArticleViewModel> operation = JsonConvert.DeserializeObject<OperationResult<ArticleViewModel>>(responseBody); //use on the page to show the article to its creator
+        }
+
+        private async Task<OperationResult<IEnumerable<ArticleViewModel>>> RequestGetArticlesAsync(ClaimManager model)
         {
             HttpClient client = _retrieveToIdentityServer.RetrieveToIdentityServer(_httpClientFactory, model.AccessToken);
 
